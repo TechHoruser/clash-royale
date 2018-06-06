@@ -1,0 +1,21 @@
+from os.path import dirname, abspath
+
+class Params:
+    token='token aportado por botfather' # TOCHANGE
+
+    mongo_user = 'username' # TOCHANGE
+    mongo_pass = 'password' # TOCHANGE
+
+    owner_id = 123456 # TOCHANGE: id del creador del canal puedes conocerlo usando el commando /get_id
+
+    admins = [
+        {
+            "username": "Owner", # TOCHANGE: Nombre de usuario
+            "id": 123456 # TOCHANGE: id del administrador
+        },
+        # ...
+    ]
+
+    clanCode = 'E3TFQ1' # TOCHANGE: Código de clan
+
+    project_path = dirname(dirname(abspath(__file__)))

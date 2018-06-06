@@ -1,0 +1,30 @@
+from os.path import dirname, abspath
+
+
+class Params:
+    token = 'token obtenido por api royale, es suministrado a través de discord' # TOCHANGE
+    endPoint = 'https://api.royaleapi.com'
+    clanCode = 'E3TFQ1' # TOCHANGE: Código de clan
+    chunkSize = 10
+
+    '''
+    ¡¡CUIDADO!!! No bajar mucho los sleep podemos ser baneados por superar el número de request por minutos
+    '''
+    sleep_general = 1800  # 1800s <=> 30min
+    sleep_miembros = 5  # 5s entre cada usuario (obtiene sus últimas 25 batallas
+
+    project_path = dirname(dirname(abspath(__file__)))
+
+    # Duración de los ficheros de error
+    file_duration_hours = 1
+
+    separator_tam = 30
+    separator_char = '-'
+
+    mongo_user = 'usuario' # TOCHANGE
+    mongo_pass = 'password' # TOCHANGE
+
+    clan_battles_type = [
+        'clanWarCollectionDay',
+        'clanWarWarDay'
+    ]

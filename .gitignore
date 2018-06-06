@@ -1,0 +1,14 @@
+# Ficheros generados
+*.pyc
+
+*.log
+*/logs/*log*
+
+daemon/errors/*.html
+
+# Ficheros del IDE
+.idea/*
+
+# Configuración: token, código de clan... Encontrarás un default para conocer variables necesarias.
+Params.py
+
