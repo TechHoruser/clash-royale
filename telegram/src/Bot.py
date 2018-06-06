@@ -10,12 +10,19 @@ import time
 import datetime
 import logging.handlers
 
-logger = logging.getLogger('bot-request')
-logger.setLevel(logging.DEBUG)
+requests_logger = logging.getLogger('bot-request')
+requests_logger.setLevel(logging.DEBUG)
 handler = logging.handlers.TimedRotatingFileHandler(filename=Params.project_path + '/logs/requests.log', when="d", interval=1, backupCount=5)
-formatter = logging.Formatter(fmt='(%(asctime)s - %(levelname)s):\n%(message)s\n------', datefmt='%d/%m/%y %H:%M:%S')
+formatter = logging.Formatter(fmt='(%(asctime)s - %(levelname)s):\n%(message)s\n------', datefmt='%d/%m/%Y %H:%M:%S')
 handler.setFormatter(formatter)
-logger.addHandler(handler)
+requests_logger.addHandler(handler)
+
+petitions_logger = logging.getLogger('petitions')
+petitions_logger.setLevel(logging.DEBUG)
+handler = logging.handlers.TimedRotatingFileHandler(filename=Params.project_path + '/logs/petitions.log')
+formatter = logging.Formatter(fmt=' - %(asctime)s -> %(message)s', datefmt='%Y%m%d%H%M%S')
+handler.setFormatter(formatter)
+petitions_logger.addHandler(handler)
 
 tb = telebot.TeleBot(Params.token)
 
@@ -28,8 +35,9 @@ previous_war - Datos de la última gerra jugada
 my_score - Te muestra los puntos que tienes actualmente
 scores - Muestra las puntuaciones de los miembros
 active_notifications - Activa las notificaciones que tengas disponibles
-help - Envia un mensaje al administrador
 get_log - Solo Creador, para revisar posibles errores
+get_petitions - Solo Creador, para revisar peticiones
+help - Envia un mensaje al administrador
 '''
 
 db = DB()
@@ -66,7 +74,7 @@ def print_log(message):
         '' if message.from_user.username is None else message.from_user.username) + '(' + str(
         message.from_user.id) + ')\n'
     msg += 'Texto: ' + message.text + '\n'
-    logger.info(msg)
+    requests_logger.info(msg)
 
 
 @tb.message_handler(commands=['start'])
@@ -139,6 +147,14 @@ def get_log(message):
         tb.send_message(message.chat.id, 'No tiene permisos')
 
 
+@tb.message_handler(commands=['get_petitions'])
+def get_petitions(message):
+    if message.chat.id == Params.owner_id:
+        tb.send_document(Params.owner_id, open(Params.project_path+'/logs/petitions.log', 'rb'))
+    else:
+        tb.send_message(message.chat.id, 'No tiene permisos')
+
+
 @tb.message_handler(commands=['help'])
 def get_id(message):
     print_log(message)
@@ -162,6 +178,9 @@ def get_id(message):
             chat_text[1],
             parse_mode='Markdown'
         )
+
+        # TODO: Realizar en función de callback de si es aceptado
+        petitions_logger.info(chat_text[1])
 
         tb.send_message(message.chat.id, '\U00002714 Mensaje enviado correctamente')
 
@@ -187,24 +206,25 @@ def notify_server_on():
     try:
         tb.send_message(Params.owner_id, 'Servidor Arrancado')
     except telebot.apihelper.ApiException:
-        logger.info('El propietario (' + str(Params.owner_id) + ') tiene bloqueado el bot')
+        requests_logger.info('El propietario (' + str(Params.owner_id) + ') tiene bloqueado el bot')
 
 
 def notify_admins():
     while True:
-        for admin in Params.admins:
+        for user in Params.users:
             '''En caso de tener el Bot bloqueado lanzará una excepción'''
-            try:
-                # TODO: Pendiente de notificar
-                '''
-                    fin de guerra
-                    puntuaciones
-                    degradaciones/ascensos
-                '''
-                tb.send_message(admin['id'], 'Notificación a administrador')
+            if user['rol'] == "admin":
+                try:
+                    # TODO: Pendiente de notificar
+                    '''
+                        fin de guerra
+                        puntuaciones
+                        degradaciones/ascensos
+                    '''
+                    tb.send_message(user['id'], 'Notificación a administrador')
 
-            except telebot.apihelper.ApiException:
-                logger.info('Administrador \''+admin['username']+'\' ('+str(admin['id'])+') tiene bloqueado el bot')
+                except telebot.apihelper.ApiException:
+                    requests_logger.info('Administrador \''+user['username']+'\' ('+str(admin['id'])+') tiene bloqueado el bot')
 
         # TODO: Calcular sleep hasta fin de la guerra
         time.sleep(10)
